@@ -1,4 +1,3 @@
-import os
 import time
 from pathlib import Path
 import requests
@@ -6,11 +5,12 @@ import random
 from lxml import etree
 from fake_useragent import UserAgent
 
+BASE_DIR = Path(__file__).parent.absolute()
 
 page_url = 'https://qingbuyaohaixiu.com/'
 # https://s3.qingbuyaohaixiu.com/image/6f711a138b6582a6a189bf315afb6577.jpeg
 img_url = 'https://s3.qingbuyaohaixiu.com/image/'
-img_path = Path(__file__).parent.absolute() / 'img' / 'qingbuyaohaixiu'
+img_path = BASE_DIR / 'img' / 'qingbuyaohaixiu'
 
 # 随机UA
 def get_random_ua():
@@ -45,7 +45,7 @@ def get_img_srcs(page):
 
 def download_img(jpeg_file):
     print('downloading', jpeg_file)
-    if os.path.exists(img_path / jpeg_file):
+    if (img_path / jpeg_file).exists():
         print(f'{jpeg_file} already exists')
         return
     url = f'{img_url}{jpeg_file}'
@@ -58,9 +58,12 @@ def download_img(jpeg_file):
         return
     with open(img_path / jpeg_file, 'wb') as f:
         f.write(response.content)
+    time.sleep(random.randint(1, 3))
     
 
 def run():
+    if not img_path.exists():
+        img_path.mkdir()
     count = 1
     page_hrefs = get_page_hrefs()
     for page_href in page_hrefs:
@@ -70,7 +73,6 @@ def run():
             img_path = img_src.split('/')[-2]
             download_img(f'{img_path}.jpeg')
         count += 1
-        time.sleep(random.randint(1, 3))
             
 if __name__ == '__main__':
     run()
