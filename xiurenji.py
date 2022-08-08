@@ -59,7 +59,6 @@ class XiuRenJiSpider(Spider):
     def task_image(self, grab, task):
         page = task.page
         vol_path = task.vol_path
-        #'//div[@class="page"]/a'
         page_no = grab.doc.select('//div[@class="content_left"]/div[@class="page"]')[0].select('a')[-1].text()
         if not page_no.isdigit() or page != int(page_no):
             next_url = task.url.replace(f'{"" if page == 1 else f"_{page-1}"}.html', f'_{page}.html')
@@ -80,4 +79,5 @@ class XiuRenJiSpider(Spider):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     bot = XiuRenJiSpider(thread_number=4)
+    bot.setup_queue(backend='mongodb', database='xiurenji')
     bot.run()
