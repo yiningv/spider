@@ -65,15 +65,17 @@ class XiuRenJiSpider(Spider):
             next_page = page + 1
             self.add_task(Task('image', url=next_url, vol_path=vol_path, page=next_page))
         for elem in grab.doc.select('//div[@class="content"]/p/img/@src'):
-            yield Task('download', url=f'{BASE_URL}{elem.text()}', vol_path=vol_path, priority=10)
+            img_src = elem.text()
+            img_name = img_src.split('/')[-1]
+            img_path = vol_path / img_name
+            if img_path.exists():
+                print(f'{img_path}已存在')
+                continue
+            yield Task('download', url=f'{BASE_URL}{img_src}', img_path=img_path, priority=10)
     
             
     def task_download(self, grab, task):
-        img_name = task.url.split('/')[-1]
-        img_path = task.vol_path / img_name
-        if img_path.exists():
-            print(f'{img_path}已存在')
-        grab.doc.save(task.vol_path / img_name)
+        grab.doc.save(task.img_path)
     
         
 if __name__ == '__main__':
